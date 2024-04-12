@@ -36,7 +36,8 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>main.Main</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>example.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

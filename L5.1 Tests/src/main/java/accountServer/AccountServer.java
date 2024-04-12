@@ -17,6 +17,11 @@ public class AccountServer implements AccountServerI {
         this.usersLimit = usersLimit;
     }
 
+    public AccountServer() {
+        this.usersCount = 0;
+        this.usersLimit = 10;
+    }
+
     @Override
     public void addNewUser() {
         usersCount += 1;
