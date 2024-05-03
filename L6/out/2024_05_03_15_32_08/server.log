@@ -1,0 +1,4 @@
+[05-03 15:32:08,437, 495] example.Main Starting at http://127.0.0.1:8080
+[05-03 15:32:08,553, 611] example.Main Server started
+[05-03 15:32:08,840, 898] servlets.ResourcesPageServlet resource.xml
+[05-03 15:32:08,845, 903] servlets.ResourcesPageServlet TestResource{name='Test1714732328556', age=798}
