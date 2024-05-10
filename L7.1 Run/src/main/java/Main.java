@@ -1,3 +1,9 @@
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author v.chibrikov
  *         <p>
@@ -7,47 +13,52 @@
  */
 public class Main {
 
-    private static final int THREADS_NUMBER = 10;
+    private static final int PORT = 5050;
+    private static final int MAX_THREADS = 10;
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i = 0; i < THREADS_NUMBER; ++i) {
-            Thread thread = new RandomSequenceExample();
-            //Thread thread = new SerialSequenceExample(i);
-            System.out.println("Start: " + thread.getName());
-            thread.start();
+        ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
+
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Server started. Listening on port " + PORT);
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                executor.submit(new ClientHandler(clientSocket));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            executor.shutdown();
         }
     }
 
-    private static class RandomSequenceExample extends Thread {
-        public void run() {
-            //System.out.println("Run: " + this.getName());
-        }
-    }
+    private static class ClientHandler implements Runnable {
+        private Socket clientSocket;
 
-    @SuppressWarnings("UnusedDeclaration")
-    private static class SerialSequenceExample extends Thread {
-        private static int currentMax = 1;
-        private int mainId;
-        private final static Object waitObject = new Object();
-
-        public SerialSequenceExample(int id) {
-            this.mainId = id;
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
         }
 
+        @Override
         public void run() {
             try {
-                System.out.println("Run: " + mainId);
-                synchronized (waitObject) {
-                    while (mainId > currentMax) {
-                        waitObject.wait();
-                        //System.out.println("Awakened: " + mainId);
-                    }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                    currentMax++;
-                    //System.out.println("Finished: " + mainId);
-                    waitObject.notifyAll();
+                String inputLine;
+                while ((inputLine = reader.readLine()) != null) {
+                    System.out.println("Received message from client: " + inputLine);
+                    writer.println(inputLine);
+                    if (inputLine.equals("Bue.")) {
+                        break;
+                    }
                 }
-            } catch (InterruptedException e) {
+
+                reader.close();
+                writer.close();
+                clientSocket.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
